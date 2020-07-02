@@ -10,12 +10,18 @@ function main() {
 
   ACCOUNT_URL="$INPUT_ACCOUNT_ID.dkr.ecr.$INPUT_REGION.amazonaws.com"
 
+  local TAGS=$INPUT_TAGS
+  if [ "${INPUT_ADD_BRANCH_TAG}" = true ]; then
+    branch_tag=$(git rev-parse --abbrev-ref HEAD | sed -e 's/\//-/g')
+    TAGS="$TAGS,$branch_tag"
+  fi
+
   aws_configure
   assume_role
   login
-  docker_build $INPUT_TAGS $ACCOUNT_URL
+  docker_build $TAGS $ACCOUNT_URL
   create_ecr_repo $INPUT_CREATE_REPO
-  docker_push_to_ecr $INPUT_TAGS $ACCOUNT_URL
+  docker_push_to_ecr $TAGS $ACCOUNT_URL
 }
 
 function sanitize() {
@@ -64,24 +70,56 @@ function create_ecr_repo() {
 function docker_build() {
   echo "== START DOCKERIZE"
   local TAG=$1
+  local ACCOUNT_URL=$2
   local docker_tag_args=""
   local DOCKER_TAGS=$(echo "$TAG" | tr "," "\n")
   for tag in $DOCKER_TAGS; do
-    docker_tag_args="$docker_tag_args -t $2/$INPUT_REPO:$tag"
+    docker_tag_args="$docker_tag_args -t $ACCOUNT_URL/$INPUT_REPO:$tag"
   done
 
-  docker build $INPUT_EXTRA_BUILD_ARGS -f $INPUT_DOCKERFILE $docker_tag_args $INPUT_PATH
+  local DOCKERFILE=$INPUT_DOCKERFILE
+
+  if [ -f $DOCKERFILE ]; then
+    echo "== USING PROVIDED Dockerfile"
+  else
+    echo "== USING GENERIC Dockerfile"
+    DOCKERFILE=$(mktemp)
+    cat << EOF > $DOCKERFILE
+FROM node:10-alpine
+
+# setting this here prevents dev dependencies from installing
+ENV NODE_ENV production
+
+# copy the app code into the /app path
+COPY ./ /app
+WORKDIR /app
+
+# install dependencies
+RUN npm install
+
+# run the build
+RUN npm run build
+
+EXPOSE 8080
+ENV PORT 8080
+CMD ["npm", "start"]
+EOF
+  fi
+
+  docker build $INPUT_EXTRA_BUILD_ARGS -f $DOCKERFILE $docker_tag_args $INPUT_PATH
   echo "== FINISHED DOCKERIZE"
 }
 
 function docker_push_to_ecr() {
   echo "== START PUSH TO ECR"
   local TAG=$1
+  local ACCOUNT_URL=$2
   local DOCKER_TAGS=$(echo "$TAG" | tr "," "\n")
   for tag in $DOCKER_TAGS; do
-    docker push $2/$INPUT_REPO:$tag
-    echo ::set-output name=image::$2/$INPUT_REPO:$tag
+    docker push $ACCOUNT_URL/$INPUT_REPO:$tag
+    echo ::set-output name=image::$ACCOUNT_URL/$INPUT_REPO:$tag
   done
+
   echo "== FINISHED PUSH TO ECR"
 }
 
