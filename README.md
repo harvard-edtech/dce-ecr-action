@@ -15,9 +15,13 @@ This action is designed to create docker images for the various
 | `create_repo` | `boolean` | `true` | Set this to true to create the repository if it does not already exist |
 | `tags` | `string` | `latest` | Comma-separated string of ECR image tags (ex latest,1.0.0,) |
 | `add_branch_tag` | `boolean` | `true` | Add an additional image tag based on the branch/revision name |
+| `add_package_version_tag_for_branch` | `string` | `master` | When building the specified branch, add an additional image tag based on the app's package.json version. Set this to an empty string to disable. |
 | `dockerfile` | `string` | `Dockerfile` | Name of Dockerfile to use |
 | `extra_build_args` | `string` | `""` | Extra flags to pass to docker build (see docs.docker.com/engine/reference/commandline/build) |
 | `path` | `string` | `.` | Path to Dockerfile, defaults to the working directory |
+
+It is recommended that the access key id/secret belong to an IAM user with only the bare minimum
+of rights needed to create ECR repos and push images to them.
 
 ## A note about the Dockerfile
 

@@ -11,9 +11,17 @@ function main() {
   ACCOUNT_URL="$INPUT_ACCOUNT_ID.dkr.ecr.$INPUT_REGION.amazonaws.com"
 
   local TAGS=$INPUT_TAGS
+  local GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD | sed -e 's/\//-/g')
+
   if [ "${INPUT_ADD_BRANCH_TAG}" = true ]; then
-    branch_tag=$(git rev-parse --abbrev-ref HEAD | sed -e 's/\//-/g')
-    TAGS="$TAGS,$branch_tag"
+    echo "== INCLUDING GIT BRANCH IMAGE TAG ${GIT_BRANCH}"
+    TAGS="$TAGS,$GIT_BRANCH"
+  fi
+
+  if [ "${INPUT_ADD_PACKAGE_VERSION_TAG_FOR_BRANCH}" = "${GIT_BRANCH}" ]; then
+    package_version=$(node -p "require('./package.json').version")
+    echo "== INCLUDING PACKAGE VERSION IMAGE TAG ${package_version}"
+    TAGS="$TAGS,$package_version"
   fi
 
   aws_configure

@@ -33,6 +33,9 @@ inputs:
   add_branch_tag:
     description: Add an additional image tag based on the branch/revision name
     default: true
+  add_package_version_tag_for_branch:
+    description: Add an additional image tag based on the app's package.json version when building the specified branch
+    default: master
   dockerfile:
     description: Name of Dockerfile to use
     default: Dockerfile
