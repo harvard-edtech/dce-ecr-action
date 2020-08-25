@@ -24,6 +24,9 @@ function main() {
     TAGS="$TAGS,$package_version"
   fi
 
+  local ECR_REPO_URL=https://console.aws.amazon.com/ecr/repositories/${INPUT_REPO}/
+
+  slack_notify "Build triggered for ${INPUT_REPO}@${GIT_BRANCH}\nECR Repository: <${ECR_REPO_URL}|${INPUT_REPO}>"
   aws_configure
   assume_role
   login
@@ -124,11 +127,36 @@ function docker_push_to_ecr() {
   local ACCOUNT_URL=$2
   local DOCKER_TAGS=$(echo "$TAG" | tr "," "\n")
   for tag in $DOCKER_TAGS; do
-    docker push $ACCOUNT_URL/$INPUT_REPO:$tag
-    echo ::set-output name=image::$ACCOUNT_URL/$INPUT_REPO:$tag
+    image_with_tag=$INPUT_REPO:$tag
+    docker push $ACCOUNT_URL/$image_with_tag
+    echo ::set-output name=image::$ACCOUNT_URL/$image_with_tag
+    slack_notify "Built and pushed *${image_with_tag}*"
   done
 
   echo "== FINISHED PUSH TO ECR"
+}
+
+function slack_notify() {
+  local MESSAGE=$1
+  if [ ! -z "${INPUT_SLACK_WEBHOOK_URL}" ]; then
+    curl $INPUT_SLACK_WEBHOOK_URL \
+      -X POST -H 'Content-type: application/json' \
+      --data @<(cat <<EOF
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": "$MESSAGE"
+              }
+            }
+          ]
+        }
+EOF
+      )
+
+  fi
 }
 
 main

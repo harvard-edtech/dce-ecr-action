@@ -45,6 +45,9 @@ inputs:
   path:
     description: Path to Dockerfile, defaults to the working directory
     default: .
+  slack_webhook_url:
+    description: Slack Webhook URL for posting notifications
+    default: ''
 outputs:
   image:
     description: 'The created image name'
