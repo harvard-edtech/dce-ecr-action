@@ -160,8 +160,10 @@ function image_scan() {
   scan_results=$(trivy image --no-progress --ignore-unfixed \
     --severity "MEDIUM,HIGH,CRITICAL" ${SCAN_ME_LABEL})
   echo "$scan_results"
-  totals=$(echo "$scan_results" | grep '^Total')
-  slack_notify "Scan results: ${totals}"
+  IFS=$'\n'
+  for l in $(echo "$scan_results" | grep -B2 '^Total' | grep -v '==\|\--'); do
+    slack_notify $l
+  done
 }
 
 function docker_push_to_ecr() {
