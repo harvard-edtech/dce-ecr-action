@@ -121,8 +121,12 @@ ENV NODE_ENV production
 COPY ./ /app
 WORKDIR /app
 
-# install dependencies
-RUN npm install
+# add git as a virtual package during the npm install
+# this is necessary in case any npm deps reference git repos
+RUN apk --update-cache add --virtual build-dependencies git \
+  && npm install \
+  && apk del build-dependencies \
+  && rm -rf /var/cache/apk/*
 
 # run the build
 RUN npm run build
