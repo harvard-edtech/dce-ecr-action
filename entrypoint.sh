@@ -128,6 +128,9 @@ RUN apk --update-cache add --virtual build-dependencies git \
   && apk del build-dependencies \
   && rm -rf /var/cache/apk/*
 
+# install dependencies
+RUN npm install
+
 # run the build
 RUN npm run build
 
