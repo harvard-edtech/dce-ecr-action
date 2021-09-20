@@ -112,7 +112,7 @@ function docker_build() {
     echo "== USING GENERIC Dockerfile"
     DOCKERFILE=$(mktemp)
     cat <<EOF >$DOCKERFILE
-FROM node:14.15-alpine3.12
+FROM node:14.17-alpine3.14
 
 # setting this here prevents dev dependencies from installing
 ENV NODE_ENV production
@@ -124,15 +124,11 @@ WORKDIR /app
 # add git as a virtual package during the npm install
 # this is necessary in case any npm deps reference git repos
 RUN apk --update-cache add --virtual build-dependencies git \
-  && npm install \
+  && npm install -g npm \
+  && npm install --unsafe-perm \
+  && npm run build \
   && apk del build-dependencies \
   && rm -rf /var/cache/apk/*
-
-# install dependencies
-RUN npm install --unsafe-perm --loglevel verbose
-
-# run the build
-RUN npm run build
 
 EXPOSE 8080
 ENV PORT 8080
