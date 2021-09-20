@@ -129,7 +129,7 @@ RUN apk --update-cache add --virtual build-dependencies git \
   && rm -rf /var/cache/apk/*
 
 # install dependencies
-RUN npm install
+RUN npm install --unsafe-perm --loglevel verbose
 
 # run the build
 RUN npm run build
