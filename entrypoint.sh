@@ -126,6 +126,7 @@ WORKDIR /app
 RUN apk --update-cache add --virtual build-dependencies git \
   && npm install -g npm \
   && npm install --unsafe-perm \
+  && npm install -g typescript \
   && npm run build \
   && apk del build-dependencies \
   && rm -rf /var/cache/apk/*

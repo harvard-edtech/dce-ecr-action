@@ -7,6 +7,8 @@ RUN apk add --no-cache \
   && pip3 install awscli \
   && rm -rf /var/cache/apk/*
 
+RUN git --version
+
 RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | \
   sh -s -- -b /usr/local/bin
 
