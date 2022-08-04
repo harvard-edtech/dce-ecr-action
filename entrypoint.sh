@@ -28,6 +28,8 @@ function main() {
       package_version=$(<version.txt)
     elif [[ -f "package.json" ]]; then
       package_version=$(node -p "require('./package.json').version")
+    elif [[ -f "composer.json" ]]; then
+      package_version=$(node -p "require('./composer.json').version")
     fi
 
     if [[ ! -z "${package_version}" ]]; then
