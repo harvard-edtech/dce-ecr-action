@@ -2,9 +2,7 @@ FROM docker:19.03.14
 
 RUN apk update && apk upgrade
 RUN apk add --no-cache \
-  python3 py3-pip coreutils bash git nodejs curl \
-  && pip3 install -U pip \
-  && pip3 install awscli \
+  python3 py3-pip coreutils bash git nodejs curl aws-cli \
   && rm -rf /var/cache/apk/*
 
 RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | \
