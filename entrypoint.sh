@@ -11,8 +11,9 @@ function main() {
   ACCOUNT_URL="$INPUT_ACCOUNT_ID.dkr.ecr.$INPUT_REGION.amazonaws.com"
 
   SCAN_ME_LABEL=${INPUT_REPO}:scan-me
+
   # also set an output to allow for other image scanning steps
-  echo ::set-output name=image_for_scanning::${SCAN_ME_LABEL}
+  echo "image_for_scanning=${SCAN_ME_LABEL}" >> $GITHUB_OUTPUT
 
   local TAGS=$INPUT_TAGS
   local GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
