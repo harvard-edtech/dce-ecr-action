@@ -48,7 +48,8 @@ function main() {
   assume_role
   login
   docker_build $TAGS $ACCOUNT_URL
-  image_scan
+  # too many requests for the trivvy db is causing image build to fail
+  # image_scan
   create_ecr_repo $INPUT_CREATE_REPO
   docker_push_to_ecr $TAGS $ACCOUNT_URL
 }
