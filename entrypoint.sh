@@ -13,7 +13,7 @@ function main() {
   SCAN_ME_LABEL=${INPUT_REPO}:scan-me
 
   # also set an output to allow for other image scanning steps
-  echo "image_for_scanning=${SCAN_ME_LABEL}" >> $GITHUB_OUTPUT
+  echo "image_for_scanning=${SCAN_ME_LABEL}" >>$GITHUB_OUTPUT
 
   local TAGS=$INPUT_TAGS
   local GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -69,8 +69,8 @@ function aws_configure() {
 
 function login() {
   echo "== START LOGIN"
-  LOGIN_COMMAND=$(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
-  $LOGIN_COMMAND
+  aws ecr get-login-password --region $AWS_DEFAULT_REGION | \
+    docker login --username AWS --password-stdin $INPUT_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
   echo "== FINISHED LOGIN"
 }
 
@@ -116,7 +116,7 @@ function docker_build() {
     echo "== USING GENERIC Dockerfile"
     DOCKERFILE=$(mktemp)
     cat <<EOF >$DOCKERFILE
-FROM node:14.17-alpine3.14
+FROM node:22-alpine
 
 # setting this here prevents dev dependencies from installing
 ENV NODE_ENV production
@@ -158,7 +158,7 @@ dist
 EOF
   fi
 
-  docker build $INPUT_EXTRA_BUILD_ARGS -f $DOCKERFILE $docker_tag_args $INPUT_PATH
+  docker build --pull -f $DOCKERFILE $docker_tag_args $INPUT_PATH
   echo "== FINISHED DOCKERIZE"
 }
 

@@ -1,4 +1,4 @@
-FROM docker:19.03.14
+FROM docker:28
 
 RUN apk update && apk upgrade
 RUN apk add --no-cache \
