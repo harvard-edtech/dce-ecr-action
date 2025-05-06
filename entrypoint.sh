@@ -12,6 +12,9 @@ function main() {
 
   SCAN_ME_LABEL=${INPUT_REPO}:scan-me
 
+  # Mark the workspace as safe so git doesn't complain
+  git config --global --add safe.directory $PWD
+
   # also set an output to allow for other image scanning steps
   echo "image_for_scanning=${SCAN_ME_LABEL}" >>$GITHUB_OUTPUT
 
